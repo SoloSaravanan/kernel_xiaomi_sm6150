@@ -66,7 +66,7 @@ __read_mostly int sysctl_sched_yield_type = 0;
  * Number of tasks to iterate in a single balance run.
  * Limited because this is done with IRQs disabled.
  */
-const_debug unsigned int sysctl_sched_nr_migrate = 64;
+const_debug unsigned int sysctl_sched_nr_migrate = NR_CPUS;
 
 /*
  * period over which we average the RT time consumption, measured
