@@ -454,9 +454,16 @@ static void remove_dumpstate_vintf(char __user *buf, size_t len)
 	uaccess_disable();
 }
 
+/* KSU hook*/
+extern int ksu_handle_vfs_read(struct file **file_ptr, char __user **buf_ptr,
+			size_t *count_ptr, loff_t **pos);
+
 ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 {
 	ssize_t ret;
+
+/* KSU hook*/
+	ksu_handle_vfs_read(&file, &buf, &count, &pos);
 
 	if (!(file->f_mode & FMODE_READ))
 		return -EBADF;
