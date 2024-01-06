@@ -289,14 +289,9 @@ unsigned long kallsyms_lookup_name(const char *name)
 	int ret;
 	unsigned int i;
 
-	/* Skip the search for empty string. */
-	if (!*name)
-		return 0;
-
 	ret = kallsyms_lookup_names(name, &i, NULL);
 	if (!ret)
 		return kallsyms_sym_address(kallsyms_seqs_of_names[i]);
-
 	return module_kallsyms_lookup_name(name);
 }
 
@@ -314,8 +309,6 @@ int kallsyms_on_each_symbol(int (*fn)(void *, const char *, struct module *,
 		ret = fn(data, namebuf, NULL, kallsyms_sym_address(i));
 		if (ret != 0)
 			return ret;
-		
-		cond_resched();
 	}
 	return module_kallsyms_on_each_symbol(fn, data);
 }
