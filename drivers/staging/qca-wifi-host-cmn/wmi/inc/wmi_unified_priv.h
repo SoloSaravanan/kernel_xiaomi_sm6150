@@ -310,8 +310,6 @@ enum WMI_RECORD_TYPE {
 #define wmi_info_rl(params...) ((void)0)
 #define wmi_debug_rl(params...) ((void)0)
 
-#else
-
 #define wmi_alert(params...) ((void)0)
 #define wmi_err(params...) ((void)0)
 #define wmi_warn(params...) ((void)0)
