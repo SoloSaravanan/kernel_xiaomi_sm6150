@@ -74,18 +74,22 @@ static short lowmem_adj[6] = {
 	1,
 	6,
 	12,
+	800,
+	900,
 };
 
-static int lowmem_adj_size = 4;
+static int lowmem_adj_size = 6;
 static int lowmem_minfree[6] = {
 	3 * 512,	/* 6MB */
 	2 * 1024,	/* 8MB */
 	4 * 1024,	/* 16MB */
 	16 * 1024,	/* 64MB */
+	40 * 1024,	/* 160MB */
+	72 * 1024,	/* 288MB */
 };
 
-static int lowmem_minfree_size = 4;
-static int lmk_fast_run = 1;
+static int lowmem_minfree_size = 6;
+static int lmk_fast_run = 0;
 
 static unsigned long lowmem_deathpending_timeout;
 
@@ -493,8 +497,8 @@ static unsigned long lowmem_scan(struct shrinker *s, struct shrink_control *sc)
 	else
 		other_file = 0;
 
-	if (!get_nr_swap_pages() && (other_free <= lowmem_minfree[0] >> 1) &&
-	    (other_file <= lowmem_minfree[0] >> 1))
+	if (!get_nr_swap_pages() && (other_free <= lowmem_minfree[0] >> 2) &&
+	    (other_file <= lowmem_minfree[0] >> 2))
 		lock_required = false;
 
 	if (likely(lock_required) && !mutex_trylock(&scan_mutex))
