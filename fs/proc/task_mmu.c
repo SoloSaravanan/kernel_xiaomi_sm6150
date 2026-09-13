@@ -27,6 +27,7 @@
 
 #include <asm/elf.h>
 #include <asm/tlb.h>
+static inline void seq_put_decimal_ull_width(struct seq_file *m, const char *s, unsigned long long v, int width) { seq_put_decimal_ull(m, s, v); } static inline void seq_put_hex_ll(struct seq_file *m, const char *s, unsigned long long v, int width) { seq_printf(m, "%s%llx", s ? s : "", v); } static inline int arch_pkeys_enabled(void) { return 0; } static inline unsigned int vma_pkey(struct vm_area_struct *vma) { return 0; }
 #include <asm/tlbflush.h>
 #include "internal.h"
 

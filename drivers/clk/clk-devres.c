@@ -9,6 +9,7 @@
 #include <linux/export.h>
 #include <linux/gfp.h>
 
+struct devm_clk_state { struct clk *clk; void (*exit)(struct clk *); };
 static void devm_clk_release(struct device *dev, void *res)
 {
 	struct devm_clk_state *state = res;

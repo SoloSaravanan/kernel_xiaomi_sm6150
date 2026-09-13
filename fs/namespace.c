@@ -109,7 +109,7 @@ static inline struct hlist_head *mp_hash(struct dentry *dentry)
 
 static int mnt_alloc_id(struct mount *mnt)
 {
-	int res = ida_alloc(&mnt_id_ida, GFP_KERNEL);
+	int res = ida_simple_get(&mnt_id_ida, 0, 0, GFP_KERNEL);
 
 	if (res < 0)
 		return res;
@@ -124,7 +124,7 @@ static void mnt_free_id(struct mount *mnt)
 		return;
 
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	ida_free(&mnt_id_ida, mnt->mnt_id);
+	ida_simple_remove(&mnt_id_ida, mnt->mnt_id);
 }
 
 /*
@@ -141,13 +141,13 @@ static int mnt_alloc_group_id(struct mount *mnt)
 	 *   when boot-completed stage is triggered in core_hook.c 
 	 */
 	if (susfs_is_current_ksu_domain()) {
-		res = ida_alloc_min(&mnt_group_ida, DEFAULT_KSU_MNT_GROUP_ID, GFP_KERNEL);
+		res = ida_simple_get(&mnt_group_ida, DEFAULT_KSU_MNT_GROUP_ID, 0, GFP_KERNEL);
 		goto bypass_orig_flow;
 	}
-	res = ida_alloc_min(&mnt_group_ida, 1, GFP_KERNEL);
+	res = ida_simple_get(&mnt_group_ida, 1, 0, GFP_KERNEL);
 bypass_orig_flow:
 #else
-	int res = ida_alloc_min(&mnt_group_ida, 1, GFP_KERNEL);
+	int res = ida_simple_get(&mnt_group_ida, 1, 0, GFP_KERNEL);
 #endif
 	if (res < 0)
 		return res;
@@ -160,7 +160,7 @@ bypass_orig_flow:
  */
 void mnt_release_group_id(struct mount *mnt)
 {
-	ida_free(&mnt_group_ida, mnt->mnt_group_id);
+	ida_simple_remove(&mnt_group_ida, mnt->mnt_group_id);
 	mnt->mnt_group_id = 0;
 }
 
@@ -268,7 +268,7 @@ static struct mount *susfs_alloc_non_unshare_ksu_vfsmnt(const char *name)
 	int res;
 
 	if (mnt) {
-		res = ida_alloc_min(&mnt_id_ida, DEFAULT_KSU_MNT_ID, GFP_KERNEL);
+		res = ida_simple_get(&mnt_id_ida, DEFAULT_KSU_MNT_ID, 0, GFP_KERNEL);
 		if (res < 0)
 			goto out_free_cache;
 

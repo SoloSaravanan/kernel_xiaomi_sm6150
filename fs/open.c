@@ -778,7 +778,7 @@ static int do_dentry_open(struct file *f,
 		goto cleanup_all;
 	}
 
-	error = security_file_open(f);
+	error = security_file_open(f, current_cred());
 	if (error)
 		goto cleanup_all;
 
@@ -890,7 +890,7 @@ EXPORT_SYMBOL(file_path);
  * @file: newly allocated file with f_flag initialized
  * @cred: credentials to use
  */
-int vfs_open(const struct path *path, struct file *file)
+int vfs_open(const struct path *path, struct file *file, const struct cred *cred)
 {
 	struct dentry *dentry = d_real(path->dentry, NULL, file->f_flags, 0);
 
@@ -915,7 +915,7 @@ struct file *dentry_open(const struct path *path, int flags,
 	f = get_empty_filp();
 	if (!IS_ERR(f)) {
 		f->f_flags = flags;
-		error = vfs_open(path, f);
+		error = vfs_open(path, f, cred);
 		if (!error) {
 			/* from now on we need fput() to dispose of f */
 			error = open_check_o_direct(f);
@@ -1066,7 +1066,7 @@ struct file *filp_clone_open(struct file *oldfile)
 		return file;
 
 	file->f_flags = oldfile->f_flags;
-	retval = vfs_open(&oldfile->f_path, file);
+	retval = vfs_open(&oldfile->f_path, file, current_cred());
 	if (retval) {
 		put_filp(file);
 		return ERR_PTR(retval);
