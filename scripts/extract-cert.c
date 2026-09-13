@@ -21,7 +21,10 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
+#include <openssl/opensslv.h>
+#if 0
 #include <openssl/engine.h>
+#endif
 
 /*
  * OpenSSL 3.0 deprecates the OpenSSL's ENGINE API.
@@ -118,7 +121,9 @@ int main(int argc, char **argv)
 		ERR(!f, "%s", cert_dst);
 		fclose(f);
 		exit(0);
-	} else if (!strncmp(cert_src, "pkcs11:", 7)) {
+	}
+#if 0
+	else if (!strncmp(cert_src, "pkcs11:", 7)) {
 		ENGINE *e;
 		struct {
 			const char *cert_id;
@@ -141,7 +146,9 @@ int main(int argc, char **argv)
 		ENGINE_ctrl_cmd(e, "LOAD_CERT_CTRL", 0, &parms, NULL, 1);
 		ERR(!parms.cert, "Get X.509 from PKCS#11");
 		write_cert(parms.cert);
-	} else {
+	}
+#endif
+	else {
 		BIO *b;
 		X509 *x509;
 
