@@ -742,7 +742,6 @@ static int do_dentry_open(struct file *f,
 	f->f_inode = inode;
 	f->f_mapping = inode->i_mapping;
 	f->f_wb_err = filemap_sample_wb_err(f->f_mapping);
-	f->f_sb_err = file_sample_sb_err(f);
 
 	if (unlikely(f->f_flags & O_PATH)) {
 		f->f_mode = FMODE_PATH;
@@ -778,7 +777,7 @@ static int do_dentry_open(struct file *f,
 		goto cleanup_all;
 	}
 
-	error = security_file_open(f, current_cred());
+	error = security_file_open(f);
 	if (error)
 		goto cleanup_all;
 
@@ -890,7 +889,7 @@ EXPORT_SYMBOL(file_path);
  * @file: newly allocated file with f_flag initialized
  * @cred: credentials to use
  */
-int vfs_open(const struct path *path, struct file *file, const struct cred *cred)
+int vfs_open(const struct path *path, struct file *file)
 {
 	struct dentry *dentry = d_real(path->dentry, NULL, file->f_flags, 0);
 
@@ -915,7 +914,7 @@ struct file *dentry_open(const struct path *path, int flags,
 	f = get_empty_filp();
 	if (!IS_ERR(f)) {
 		f->f_flags = flags;
-		error = vfs_open(path, f, cred);
+		error = vfs_open(path, f);
 		if (!error) {
 			/* from now on we need fput() to dispose of f */
 			error = open_check_o_direct(f);
@@ -1066,7 +1065,7 @@ struct file *filp_clone_open(struct file *oldfile)
 		return file;
 
 	file->f_flags = oldfile->f_flags;
-	retval = vfs_open(&oldfile->f_path, file, current_cred());
+	retval = vfs_open(&oldfile->f_path, file);
 	if (retval) {
 		put_filp(file);
 		return ERR_PTR(retval);
