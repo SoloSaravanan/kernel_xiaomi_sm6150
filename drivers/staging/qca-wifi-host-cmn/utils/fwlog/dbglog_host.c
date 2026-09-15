@@ -4466,6 +4466,7 @@ dbglog_wow_print_handler(uint32_t mod_id,
 	return true;
 }
 
+#ifdef FEATURE_FW_LOG_PARSING
 int dbglog_parser_type_init(wmi_unified_t wmi_handle, int type)
 {
 	if (type >= DBGLOG_PROCESS_MAX)
@@ -4561,3 +4562,5 @@ int dbglog_deinit(wmi_unified_t wmi_handle)
 
 	return res;
 }
+
+#endif /* FEATURE_FW_LOG_PARSING */
