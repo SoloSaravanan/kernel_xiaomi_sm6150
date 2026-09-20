@@ -858,8 +858,13 @@ int goodix_do_fw_update(int mode);
 extern int sync_read_rawdata( unsigned int reg,
 		unsigned char *data, unsigned int len);
 
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_GOODIX_GTX9896_TOOLS)
 extern int goodix_tools_register(void);
 extern int goodix_tools_unregister(void);
+#else
+static inline int goodix_tools_register(void) { return 0; }
+static inline int goodix_tools_unregister(void) { return 0; }
+#endif
 
 #define TS_RAWDATA_BUFF_MAX					2000
 #define TS_RAWDATA_RESULT_MAX				100
@@ -868,9 +873,15 @@ struct ts_rawdata_info{
 	u16 buff[TS_RAWDATA_BUFF_MAX];
 	char result[TS_RAWDATA_RESULT_MAX];
 };
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_GOODIX_GTX9896_TOOLS)
 extern int gtx8_get_rawdata(void *tsdev, struct ts_rawdata_info *info);
 extern int gtx8_dump_data(void *tsdev, char *buf, int *buf_size);
 extern void set_test_flag(int flag);
+#else
+static inline int gtx8_get_rawdata(void *tsdev, struct ts_rawdata_info *info) { return -ENODEV; }
+static inline int gtx8_dump_data(void *tsdev, char *buf, int *buf_size) { return -ENODEV; }
+static inline void set_test_flag(int flag) { }
+#endif
 extern void goodix_charger_in(struct goodix_ts_core *core_data);
 extern struct goodix_ts_core *goodix_core_data;
 
