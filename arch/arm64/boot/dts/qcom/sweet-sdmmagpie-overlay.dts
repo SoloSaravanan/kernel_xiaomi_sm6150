@@ -19,7 +19,6 @@
 
 #include "xiaomi/sweet/sweet-audio-overlay.dtsi"
 #include "xiaomi/sweet/sweet-sdmmagpie.dtsi"
-#include "xiaomi/sweet/sweet-nfc-overlay.dtsi"
 
 / {
 	model = "SWEET";
