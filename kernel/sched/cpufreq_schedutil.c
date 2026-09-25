@@ -21,6 +21,12 @@
 
 #define SUGOV_KTHREAD_PRIORITY	50
 
+/* Battery-oriented rate shaping while preserving per-policy transition latency. */
+#define SUGOV_UP_RATE_NUM	5
+#define SUGOV_UP_RATE_DEN	4
+#define SUGOV_DOWN_RATE_NUM	3
+#define SUGOV_DOWN_RATE_DEN	4
+
 struct sugov_tunables {
 	struct gov_attr_set attr_set;
 	unsigned int		up_rate_limit_us;
@@ -972,10 +978,17 @@ static int sugov_init(struct cpufreq_policy *policy)
 		goto stop_kthread;
 	}
 
-	tunables->up_rate_limit_us =
-				cpufreq_policy_transition_delay_us(policy);
-	tunables->down_rate_limit_us =
-				cpufreq_policy_transition_delay_us(policy);
+	{
+		unsigned int delay_us =
+			cpufreq_policy_transition_delay_us(policy);
+
+		tunables->up_rate_limit_us =
+			max(1U, (delay_us * SUGOV_UP_RATE_NUM +
+				SUGOV_UP_RATE_DEN - 1) / SUGOV_UP_RATE_DEN);
+		tunables->down_rate_limit_us =
+			max(1U, (delay_us * SUGOV_DOWN_RATE_NUM) /
+				SUGOV_DOWN_RATE_DEN);
+	}
 	tunables->hispeed_load = DEFAULT_HISPEED_LOAD;
 	tunables->hispeed_freq = 0;
 
