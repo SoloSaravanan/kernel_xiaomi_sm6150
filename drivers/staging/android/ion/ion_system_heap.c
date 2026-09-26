@@ -306,8 +306,10 @@ static int ion_system_heap_allocate(struct ion_heap *heap,
 	while (size_remaining > 0) {
 		if (i >= ARRAY_SIZE(info_onstack)) {
 			info = kmem_cache_alloc(ion_page_info_pool, GFP_KERNEL);
-			if (!info)
+			if (!info) {
+				ret = -ENOMEM;
 				goto err;
+			}
 		} else {
 			info = &info_onstack[i];
 		}
