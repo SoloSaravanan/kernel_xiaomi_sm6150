@@ -873,6 +873,7 @@ static void sde_hw_intr_dispatch_irq(struct sde_hw_intr *intr,
 	int start_idx;
 	int end_idx;
 	u32 irq_status;
+	u32 enable_mask;
 	unsigned long irq_flags;
 	int sde_irq_idx;
 
@@ -892,6 +893,12 @@ static void sde_hw_intr_dispatch_irq(struct sde_hw_intr *intr,
 		if (!irq_status)
 			continue;
 
+		enable_mask = SDE_REG_READ(&intr->hw,
+				intr->sde_irq_tbl[reg_idx].en_off);
+		SDE_REG_WRITE(&intr->hw, intr->sde_irq_tbl[reg_idx].clr_off,
+				irq_status);
+		irq_status &= enable_mask;
+		wmb();
 		/* get the global offset in 'sde_irq_map' */
 		sde_irq_idx = intr->sde_irq_tbl[reg_idx].sde_irq_idx;
 		if (sde_irq_idx < 0)
@@ -916,7 +923,8 @@ static void sde_hw_intr_dispatch_irq(struct sde_hw_intr *intr,
 		for (irq_idx = start_idx;
 				(irq_idx < end_idx) && irq_status;
 				irq_idx++)
-			if (irq_status & sde_irq_map[irq_idx].irq_mask) {
+			if ((irq_status & sde_irq_map[irq_idx].irq_mask) &&
+				(sde_irq_map[irq_idx].reg_idx == reg_idx)) {
 				/*
 				 * Once a match on irq mask, perform a callback
 				 * to the given cbfunc.
@@ -932,9 +940,6 @@ static void sde_hw_intr_dispatch_irq(struct sde_hw_intr *intr,
 				irq_status &= ~sde_irq_map[irq_idx].irq_mask;
 			}
 
-		/* Clear the interrupt */
-		SDE_REG_WRITE(&intr->hw, intr->sde_irq_tbl[reg_idx].clr_off,
-				0xffffffff);
 	}
 
 	/* ensure register writes go through */
