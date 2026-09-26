@@ -390,7 +390,7 @@ static int sde_debugfs_core_irq_show(struct seq_file *s, void *v)
 	struct sde_irq *irq_obj = s->private;
 	struct sde_irq_callback *cb;
 	unsigned long irq_flags;
-	int i, irq_count, enable_count, cb_count;
+	int i, enable_count, cb_count;
 
 	if (!irq_obj || !irq_obj->enable_counts || !irq_obj->irq_cb_tbl) {
 		SDE_ERROR("invalid parameters\n");
@@ -405,7 +405,7 @@ static int sde_debugfs_core_irq_show(struct seq_file *s, void *v)
 			cb_count++;
 		spin_unlock_irqrestore(&irq_obj->cb_lock, irq_flags);
 
-		if (irq_count || enable_count || cb_count)
+		if (enable_count || cb_count)
 			seq_printf(s, "idx:%d enable:%d cb:%d\n",
 					i, enable_count, cb_count);
 	}
