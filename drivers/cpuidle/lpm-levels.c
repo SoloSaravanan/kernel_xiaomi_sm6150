@@ -664,7 +664,7 @@ static int cpu_power_select(struct cpuidle_device *dev,
 		min_residency = pwr_params->min_residency;
 		max_residency = pwr_params->max_residency;
 
-		if (latency_us <= lvl_latency_us)
+		if (latency_us < lvl_latency_us)
 			break;
 
 		if (next_event_us) {
