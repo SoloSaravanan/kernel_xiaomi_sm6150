@@ -30,3 +30,11 @@
 &msm_gpu {
 	/delete-property/ qcom,no-nap;
 };
+
+&cpu_cpu_llcc_bw {
+	qcom,min-sample-ms = <8>;
+};
+
+&cpu_llcc_ddr_bw {
+	qcom,min-sample-ms = <8>;
+};

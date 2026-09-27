@@ -40,6 +40,7 @@ struct hwmon_node {
 	unsigned int io_percent;
 	unsigned int bw_step;
 	unsigned int sample_ms;
+	unsigned int min_sample_ms;
 	unsigned int up_scale;
 	unsigned int up_thres;
 	unsigned int down_thres;
@@ -779,7 +780,7 @@ static ssize_t sample_ms_store(struct device *dev,
 	if (ret)
 		return ret;
 
-	val = max(val, SAMPLE_MIN_MS);
+	val = max(val, hw->min_sample_ms);
 	val = min(val, SAMPLE_MAX_MS);
 	if (val > df->profile->polling_ms)
 		return -EINVAL;
@@ -938,6 +939,7 @@ int register_bw_hwmon(struct device *dev, struct bw_hwmon *hwmon)
 {
 	int ret = 0;
 	struct hwmon_node *node;
+	u32 min_sample_ms;
 	struct attribute_group *attr_grp;
 
 	if (!hwmon->gov && !hwmon->dev && !hwmon->of_node)
@@ -969,6 +971,12 @@ int register_bw_hwmon(struct device *dev, struct bw_hwmon *hwmon)
 	node->io_percent = 16;
 	node->bw_step = 190;
 	node->sample_ms = 50;
+	node->min_sample_ms = SAMPLE_MIN_MS;
+	if (hwmon->of_node &&
+	    !of_property_read_u32(hwmon->of_node, "qcom,min-sample-ms",
+				  &min_sample_ms))
+		node->min_sample_ms = clamp(min_sample_ms, SAMPLE_MIN_MS,
+					    SAMPLE_MAX_MS);
 	node->up_scale = 0;
 	node->up_thres = 10;
 	node->down_thres = 0;
