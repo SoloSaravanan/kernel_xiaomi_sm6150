@@ -38,3 +38,7 @@
 &cpu_llcc_ddr_bw {
 	qcom,min-sample-ms = <8>;
 };
+
+&cpu6_cpu_l3_lat {
+	qcom,max-ratio-ceil = <1000>;
+};

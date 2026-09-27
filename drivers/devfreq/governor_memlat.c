@@ -36,6 +36,7 @@
 
 struct memlat_node {
 	unsigned int ratio_ceil;
+	unsigned int ratio_ceil_max;
 	unsigned int stall_floor;
 	bool mon_started;
 	bool already_zero;
@@ -325,7 +326,29 @@ static int devfreq_memlat_get_freq(struct devfreq *df,
 	return 0;
 }
 
-gov_attr(ratio_ceil, 1U, 20000U);
+show_attr(ratio_ceil)
+static ssize_t store_ratio_ceil(struct device *dev,
+				struct device_attribute *attr, const char *buf,
+				size_t count)
+{
+	struct devfreq *df = to_devfreq(dev);
+	struct memlat_node *node = df->data;
+	unsigned int val;
+	int ret;
+
+	ret = kstrtouint(buf, 10, &val);
+	if (ret)
+		return ret;
+
+	val = clamp(val, 1U, 20000U);
+	if (node->ratio_ceil_max)
+		val = min(val, node->ratio_ceil_max);
+	node->ratio_ceil = val;
+
+	return count;
+}
+
+static DEVICE_ATTR(ratio_ceil, 0644, show_ratio_ceil, store_ratio_ceil);
 gov_attr(stall_floor, 0U, 100U);
 
 static struct attribute *memlat_dev_attr[] = {
@@ -477,6 +500,7 @@ static struct memlat_node *register_common(struct device *dev,
 {
 	struct memlat_node *node;
 	struct device_node *of_child;
+	u32 ratio_ceil_max;
 
 	if (!hw->dev && !hw->of_node)
 		return ERR_PTR(-EINVAL);
@@ -487,6 +511,10 @@ static struct memlat_node *register_common(struct device *dev,
 
 	node->ratio_ceil = 10;
 	node->hw = hw;
+	if (hw->of_node &&
+	    !of_property_read_u32(hw->of_node, "qcom,max-ratio-ceil",
+				  &ratio_ceil_max))
+		node->ratio_ceil_max = clamp(ratio_ceil_max, 1U, 20000U);
 
 	if (hw->get_child_of_node) {
 		of_child = hw->get_child_of_node(dev);
