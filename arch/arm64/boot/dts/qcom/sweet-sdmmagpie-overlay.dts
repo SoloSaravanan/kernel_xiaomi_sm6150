@@ -26,3 +26,7 @@
 	qcom,msm-id = <365 0x0>;
 	qcom,board-id = <46 0>;
 };
+
+&msm_gpu {
+	/delete-property/ qcom,no-nap;
+};
