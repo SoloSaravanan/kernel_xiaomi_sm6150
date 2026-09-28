@@ -2817,6 +2817,12 @@ static int aw8624_haptics_upload_effect(struct input_dev *dev,
 		/*cont mode set duration */
 		aw8624->duration = effect->replay.length;
 		aw8624->activate_mode = AW8624_HAPTIC_ACTIVATE_RAM_LOOP_MODE;
+		/* Honor the requested force-feedback strength (signed s16). */
+		play->vmax_mv = effect->u.constant.level < 0 ?
+			-(int)effect->u.constant.level :
+			effect->u.constant.level;
+		if (play->vmax_mv > AW8624_STRONG_MAGNITUDE)
+			play->vmax_mv = AW8624_STRONG_MAGNITUDE;
 		aw8624->effect_id = aw8624->info.effect_id_boundary;
 
 	} else if (aw8624->effect_type == FF_PERIODIC) {
