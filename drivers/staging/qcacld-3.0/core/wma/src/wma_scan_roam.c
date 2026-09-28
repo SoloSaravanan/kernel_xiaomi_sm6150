@@ -3762,6 +3762,15 @@ int wma_roam_stats_event_handler(WMA_HANDLE handle, uint8_t *event,
 	uint32_t rem_len;
 	QDF_STATUS status;
 
+	/*
+	 * Validate the fixed event header before reading its fields or
+	 * subtracting its size from the unsigned event length below.
+	 */
+	if (len < sizeof(*fixed_param)) {
+		wma_err_rl("Invalid roam stats event length %u", len);
+		return -EINVAL;
+	}
+
 	param_buf = (WMI_ROAM_STATS_EVENTID_param_tlvs *)event;
 	if (!param_buf) {
 		wma_err_rl("NULL event received from target");
