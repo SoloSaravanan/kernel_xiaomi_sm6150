@@ -500,7 +500,7 @@ static struct memlat_node *register_common(struct device *dev,
 {
 	struct memlat_node *node;
 	struct device_node *of_child;
-	u32 ratio_ceil_max;
+	u32 ratio_ceil, ratio_ceil_max;
 
 	if (!hw->dev && !hw->of_node)
 		return ERR_PTR(-EINVAL);
@@ -511,6 +511,10 @@ static struct memlat_node *register_common(struct device *dev,
 
 	node->ratio_ceil = 10;
 	node->hw = hw;
+	if (hw->of_node &&
+	    !of_property_read_u32(hw->of_node, "qcom,ratio-ceil", &ratio_ceil))
+		node->ratio_ceil = clamp(ratio_ceil, 1U, 20000U);
+
 	if (hw->of_node &&
 	    !of_property_read_u32(hw->of_node, "qcom,max-ratio-ceil",
 				  &ratio_ceil_max))

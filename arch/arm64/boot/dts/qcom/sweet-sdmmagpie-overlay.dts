@@ -40,5 +40,6 @@
 };
 
 &cpu6_cpu_l3_lat {
+	qcom,ratio-ceil = <9>;
 	qcom,max-ratio-ceil = <1000>;
 };
