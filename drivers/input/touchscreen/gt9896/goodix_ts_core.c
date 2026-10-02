@@ -2833,7 +2833,7 @@ static int gtp_set_cur_value(int gtp_mode, int gtp_value)
 	int ret = 0;
 	ts_info("mode:%d, value:%d", gtp_mode, gtp_value);
 
-	if (gtp_mode >= Touch_Mode_NUM) {
+	if (gtp_mode < 0 || gtp_mode >= Touch_Mode_NUM) {
 		ts_err("gtp mode is error:%d", gtp_mode);
 		return -EINVAL;
 	}
