@@ -32,9 +32,9 @@
 #define RMNET_SHS_HT rmnet_shs_ht
 #define RMNET_SHS_HT_SIZE 9
 #define RMNET_SHS_MAX_SKB_INACTIVE_TSEC 30
-#define MAX_SILVER_CORES 4
+#define MAX_SILVER_CORES 6
 #define MAX_CPUS  8
-#define PERF_MASK 0xF0
+#define PERF_MASK 0xC0
 
 /* RPS mask change's Default core for orphaned CPU flows */
 #define MAIN_CORE 0
