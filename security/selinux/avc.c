@@ -47,7 +47,7 @@
 #ifdef CONFIG_KSU_SUSFS
 extern u32 susfs_ksu_sid;
 extern u32 susfs_priv_app_sid;
-bool susfs_is_avc_log_spoofing_enabled = false;
+bool susfs_is_avc_log_spoofing_enabled = true;
 #endif
 
 struct avc_entry {
