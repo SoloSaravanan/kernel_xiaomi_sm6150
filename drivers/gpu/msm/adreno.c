@@ -11,6 +11,7 @@
  * GNU General Public License for more details.
  *
  */
+#include <linux/capability.h>
 #include <linux/module.h>
 #include <linux/uaccess.h>
 #include <linux/sched.h>
@@ -2909,6 +2910,12 @@ static int adreno_setproperty(struct kgsl_device_private *dev_priv,
 	switch (type) {
 	case KGSL_PROP_PWRCTRL: {
 			unsigned int enable;
+
+			/* This changes power policy globally for all GPU clients. */
+			if (!capable(CAP_SYS_ADMIN)) {
+				status = -EPERM;
+				break;
+			}
 
 			if (sizebytes != sizeof(enable))
 				break;
