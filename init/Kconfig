@@ -1175,10 +1175,11 @@ config CC_OPTIMIZE_FOR_PERFORMANCE
 	  helpful compile-time warnings.
 
 config CC_OPTIMIZE_FOR_SIZE
-	bool "Optimize for size"
+	bool "Optimize for size (-Oz)"
 	help
-	  Enabling this option will pass "-Os" instead of "-O2" to
-	  your compiler resulting in a smaller kernel.
+	  When supported, this option passes "-Oz" instead of "-O2" to
+	  your compiler to further reduce code size. If "-Oz" is not
+	  supported, it falls back to "-Os".
 
 	  If unsure, say N.
 
