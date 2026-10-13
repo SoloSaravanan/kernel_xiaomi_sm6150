@@ -1821,7 +1821,9 @@ build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *att
 	enum s_alloc alloc_state;
 	struct sched_domain *sd;
 	struct s_data d;
-	int i, ret = -ENOMEM;
+	struct max_cpu_capacity *mcc;
+	unsigned long flags;
+	int i, max_capacity_cpu, ret = -ENOMEM;
 
 	alloc_state = __visit_domain_allocation_hell(&d, cpu_map);
 	if (alloc_state != sa_rootdomain)
@@ -1900,6 +1902,20 @@ build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *att
 			WRITE_ONCE(d.rd->mid_cap_orig_cpu, i);
 			break;
 		}
+	}
+
+	/*
+	 * init_sched_groups_capacity() updates CPU capacities before these CPUs
+	 * are attached to d.rd, so it may have updated their previous root
+	 * domain. Seed the new root domain with the capacity of its strongest CPU.
+	 */
+	max_capacity_cpu = READ_ONCE(d.rd->max_cap_orig_cpu);
+	if (max_capacity_cpu >= 0) {
+		mcc = &d.rd->max_cpu_capacity;
+		raw_spin_lock_irqsave(&mcc->lock, flags);
+		mcc->cpu = max_capacity_cpu;
+		mcc->val = cpu_rq(max_capacity_cpu)->cpu_capacity_orig;
+		raw_spin_unlock_irqrestore(&mcc->lock, flags);
 	}
 	rcu_read_unlock();
 
