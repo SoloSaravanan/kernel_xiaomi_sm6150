@@ -146,7 +146,6 @@ struct usb_hub *usb_hub_to_struct_hub(struct usb_device *hdev)
 int usb_device_supports_lpm(struct usb_device *udev)
 {
 	/* Some devices have trouble with LPM */
-	return 0;
 	if (udev->quirks & USB_QUIRK_NO_LPM)
 		return 0;
 
@@ -4464,14 +4463,17 @@ static void hub_set_initial_usb2_lpm_policy(struct usb_device *udev)
 	struct usb_hub *hub = usb_hub_to_struct_hub(udev->parent);
 	int connect_type = USB_PORT_CONNECT_TYPE_UNKNOWN;
 
-	if (!udev->usb2_hw_lpm_capable || !udev->bos)
+	if (!udev->usb2_hw_lpm_capable || !udev->bos ||
+	    (udev->quirks & USB_QUIRK_NO_LPM))
 		return;
 
 	if (hub)
 		connect_type = hub->ports[udev->portnum - 1]->connect_type;
 
-	if ((udev->bos->ext_cap->bmAttributes & cpu_to_le32(USB_BESL_SUPPORT)) ||
-			connect_type == USB_PORT_CONNECT_TYPE_HARD_WIRED) {
+	if ((udev->bos->ext_cap &&
+	     (udev->bos->ext_cap->bmAttributes &
+	      cpu_to_le32(USB_BESL_SUPPORT))) ||
+	    connect_type == USB_PORT_CONNECT_TYPE_HARD_WIRED) {
 		udev->usb2_hw_lpm_allowed = 1;
 		usb_enable_usb2_hardware_lpm(udev);
 	}
@@ -4826,8 +4828,7 @@ hub_port_init(struct usb_hub *hub, struct usb_device *udev, int port1,
 	/* notify HCD that we have a device connected and addressed */
 	if (hcd->driver->update_device)
 		hcd->driver->update_device(hcd, udev);
-	if (0)
-		hub_set_initial_usb2_lpm_policy(udev);
+	hub_set_initial_usb2_lpm_policy(udev);
 fail:
 	if (retval) {
 		hub_port_disable(hub, port1, 0);
