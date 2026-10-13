@@ -333,8 +333,13 @@ static int l2cap_sock_accept(struct socket *sock, struct socket *newsock,
 		}
 
 		nsk = bt_accept_dequeue(sk, newsock);
-		if (nsk)
+		if (nsk) {
+			/* Drop the temporary reference returned by dequeue;
+			 * the grafted socket owns the child from here.
+			 */
+			sock_put(nsk);
 			break;
+		}
 
 		if (!timeo) {
 			err = -EAGAIN;
@@ -1249,6 +1254,7 @@ static void l2cap_sock_cleanup_listen(struct sock *parent)
 
 		l2cap_chan_unlock(chan);
 		l2cap_chan_put(chan);
+		sock_put(sk);
 	}
 }
 

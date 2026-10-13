@@ -221,13 +221,11 @@ restart:
 			goto restart;
 		}
 
-		/* sk is safely in the parent list so reduce reference count */
-		sock_put(sk);
-
 		/* FIXME: Is this check still needed */
 		if (sk->sk_state == BT_CLOSED) {
 			bt_accept_unlink(sk);
 			release_sock(sk);
+			sock_put(sk);
 			continue;
 		}
 
@@ -237,11 +235,15 @@ restart:
 			if (newsock)
 				sock_graft(sk, newsock);
 
+			/* The reference taken above keeps sk alive across unlink
+			 * and is handed to the caller on success.
+			 */
 			release_sock(sk);
 			return sk;
 		}
 
 		release_sock(sk);
+		sock_put(sk);
 	}
 
 	return NULL;
