@@ -44,6 +44,16 @@ config THREAD_INFO_IN_TASK
 
 menu "General setup"
 
+# This device kernel is built with Clang, its integrated assembler, and LLD.
+config CC_IS_CLANG
+	def_bool y
+
+config AS_IS_LLVM
+	def_bool y
+
+config LD_IS_LLD
+	def_bool y
+
 config BROKEN
 	bool
 
