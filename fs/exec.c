@@ -72,6 +72,11 @@
 
 #include <trace/events/sched.h>
 
+#ifdef CONFIG_KSU_MANUAL_HOOK
+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
+			       void *argv, void *envp, int *flags);
+#endif
+
 int suid_dumpable = 0;
 
 static LIST_HEAD(formats);
@@ -1757,6 +1762,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 
 	check_unsafe_exec(bprm);
 	current->in_execve = 1;
+#ifdef CONFIG_KSU_MANUAL_HOOK
+	/* Kernel-initiated execs via do_execve_file() may have no filename. */
+	if (filename)
+		ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
+#endif
 
 	if (!file)
 		file = do_open_execat(fd, filename, flags);
